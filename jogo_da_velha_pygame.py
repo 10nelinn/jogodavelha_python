@@ -22,7 +22,7 @@ BG_COLOR = (100, 170, 156)
 LINE_COLOR = (89, 145, 135)
 CIRCLE_COLOR = (239, 231, 200)
 CROSS_COLOR = (66, 66, 66)
-BUTTON_COLOR = (50, 205, 50)
+BUTTON_COLOR = BG_COLOR  # Botão com a mesma cor do fundo
 BUTTON_TEXT_COLOR = (255, 255, 255)
 
 # Criando a tela
@@ -44,13 +44,22 @@ def draw_lines():
 
 # Função para desenhar as figuras (círculos e cruzes)
 def draw_figures():
+    # Percorre cada célula do tabuleiro para desenhar as figuras de acordo com o valor
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
             if board[row][col] == 1:
-                pygame.draw.circle(screen, CIRCLE_COLOR, (int(col * SQUARE_SIZE + SQUARE_SIZE // 2), int(row * SQUARE_SIZE + SQUARE_SIZE // 2)), CIRCLE_RADIUS, CIRCLE_WIDTH)
+                pygame.draw.circle(screen, CIRCLE_COLOR,
+                                   (int(col * SQUARE_SIZE + SQUARE_SIZE // 2), int(row * SQUARE_SIZE + SQUARE_SIZE // 2)),
+                                   CIRCLE_RADIUS, CIRCLE_WIDTH)
             elif board[row][col] == 2:
-                pygame.draw.line(screen, CROSS_COLOR, (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE), (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SPACE), CROSS_WIDTH)
-                pygame.draw.line(screen, CROSS_COLOR, (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SPACE), (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE), CROSS_WIDTH)
+                pygame.draw.line(screen, CROSS_COLOR,
+                                 (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE),
+                                 (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SPACE),
+                                 CROSS_WIDTH)
+                pygame.draw.line(screen, CROSS_COLOR,
+                                 (col * SQUARE_SIZE + SPACE, row * SQUARE_SIZE + SPACE),
+                                 (col * SQUARE_SIZE + SQUARE_SIZE - SPACE, row * SQUARE_SIZE + SQUARE_SIZE - SPACE),
+                                 CROSS_WIDTH)
 
 # Função para marcar uma célula
 def mark_square(row, col, player):
@@ -116,60 +125,64 @@ def draw_descending_diagonal(player):
 
 # Função para desenhar o botão de reiniciar
 def draw_restart_button():
+    # Desenha o botão na mesma cor do fundo
     pygame.draw.rect(screen, BUTTON_COLOR, (WIDTH // 2 - 100, HEIGHT - 50, 200, 40))
     font = pygame.font.Font(None, 40)
-    text = font.render('Reiniciar', True, BUTTON_TEXT_COLOR)
-    screen.blit(text, (WIDTH // 2 - 70, HEIGHT - 45))
+    text = font.render('Reiniciar', True, BUTTON_TEXT_COLOR)  # Renderiza o texto "Reiniciar"
+    screen.blit(text, (WIDTH // 2 - 70, HEIGHT - 45))  # Desenha o texto no botão
 
 # Função para verificar se o botão de reiniciar foi clicado
 def is_restart_button_clicked(pos):
+    # Verifica se o clique está dentro das coordenadas do botão
     if WIDTH // 2 - 100 <= pos[0] <= WIDTH // 2 + 100 and HEIGHT - 50 <= pos[1] <= HEIGHT - 10:
         return True
     return False
 
 # Função para reiniciar o jogo
 def restart():
-    screen.fill(BG_COLOR)
-    draw_lines()
-    draw_restart_button()
+    screen.fill(BG_COLOR)  # Limpa a tela
+    draw_lines()  # Redesenha as linhas do tabuleiro
+    draw_restart_button()  # Redesenha o botão de reiniciar
     for row in range(BOARD_ROWS):
         for col in range(BOARD_COLS):
-            board[row][col] = 0
+            board[row][col] = 0  # Zera todas as células do tabuleiro
 
 # Desenhar as linhas iniciais e o botão de reiniciar
-draw_lines()
-draw_restart_button()
+draw_lines()  # Desenha as linhas do tabuleiro
+draw_restart_button()  # Desenha o botão de reiniciar
 
 # Inicializando variáveis de controle do jogo
-player = 1
-game_over = False
+player = 1  # Começa com o jogador 1
+game_over = False  # Indica se o jogo terminou
 
 # Loop principal do jogo
 while True:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT:  # Se o jogador fechar a janela
             pygame.quit()
             sys.exit()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            mouseX = event.pos[0]  # X
-            mouseY = event.pos[1]  # Y
+        if event.type == pygame.MOUSEBUTTONDOWN:  # Verifica clique do mouse
+            mouseX = event.pos[0]  # Coordenada X do clique
+            mouseY = event.pos[1]  # Coordenada Y do clique
 
+            # Verifica se o botão de reiniciar foi clicado
             if is_restart_button_clicked(event.pos):
-                restart()
-                game_over = False
-                player = 1
+                restart()  # Reinicia o jogo
+                game_over = False  # Reinicia o estado de game_over
+                player = 1  # Reinicia com o jogador 1
 
             if not game_over:
-                clicked_row = mouseY // SQUARE_SIZE
-                clicked_col = mouseX // SQUARE_SIZE
+                clicked_row = mouseY // SQUARE_SIZE  # Determina a linha clicada
+                clicked_col = mouseX // SQUARE_SIZE  # Determina a coluna clicada
 
+                # Se a célula clicada estiver disponível
                 if clicked_row < BOARD_ROWS and available_square(clicked_row, clicked_col):
-                    mark_square(clicked_row, clicked_col, player)
-                    if check_win(player):
-                        game_over = True
-                    player = 3 - player  # Alterna entre 1 e 2
+                    mark_square(clicked_row, clicked_col, player)  # Marca a célula com o jogador atual
+                    if check_win(player):  # Verifica se o jogador venceu
+                        game_over = True  # Marca o jogo como terminado
+                    player = 3 - player  # Alterna entre o jogador 1 e 2
 
-                    draw_figures()
+                    draw_figures()  # Redesenha as figuras no tabuleiro
 
-    pygame.display.update()
+    pygame.display.update()  # Atualiza a tela
